@@ -13,7 +13,7 @@ def mail():
     port = 465
 
     msg = EmailMessage()
-#joannagarcia122@gmail.com
+
     msg["Subject"] = "Love Test"
     msg["From"] = ""
     msg["To"] = ""
