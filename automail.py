@@ -14,7 +14,7 @@ def mail():
 
     msg = EmailMessage()
 
-    msg["Subject"] = "Love Test"
+    msg["Subject"] = ""
     msg["From"] = ""
     msg["To"] = ""
     msg.set_content(quote)
@@ -30,7 +30,7 @@ def mail():
         server.quit()
 
 #schedule email daily
-schedule.every(10).seconds.do(mail)
+schedule.every().day.at("15:00").do(mail)
 while True:
     schedule.run_pending()
     time.sleep(1)
