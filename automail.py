@@ -1,4 +1,4 @@
-import requests, bs4, smtplib, ssl, random, schedule, time
+import smtplib, ssl, random, schedule, time
 from email.message import EmailMessage
 
 
