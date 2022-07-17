@@ -1,4 +1,4 @@
-import smtplib, ssl, random, schedule, time, praw, datetime, re
+import smtplib, ssl, random, schedule, time, praw, datetime, re, math
 import urllib.request
 from email.message import EmailMessage
 from email.utils import make_msgid
@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
     #global variables
 now = datetime.datetime.now()
 today_date = datetime.date.today()
-first_date=date(2020, 8, 17)
+first_date=datetime.date(2020, 8, 17)
 ad = 17
 cy = now.year
 cm = now.month
