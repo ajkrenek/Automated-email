@@ -130,9 +130,9 @@ class Mail:
             server.quit()
 
     def special_mail():
-        loveQ = love_quote()
-        loveU = love_url()
-        frogU = frog_picture_url()
+        Quote = reddit_quote()
+        Url = tumblr_url()
+        Picture = reddit_picture_url()
 
         msg = EmailMessage()
 
