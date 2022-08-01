@@ -124,8 +124,8 @@ class Mail:
     </html>
 """.format(Quote=Quote, Url=Url, Picture=Picture), subtype = 'html') #embeds quote, link, and picture resized to 400x400 pixels
 
-        with smtplib.SMTP_SSL("smtp.gmail.com", port) as server:
-            server.login(email, password)
+        with smtplib.SMTP_SSL("smtp.gmail.com", self.port) as server:
+            server.login(self.email, self.password)
             server.send_message(msg)
             server.quit()
 
@@ -153,8 +153,8 @@ class Mail:
     </html>
 """.format(Quote=Quote, Url=Url, Picture=Picture, years=year, months=month), subtype = 'html') #embeds the year and month into email
 
-        with smtplib.SMTP_SSL("smtp.gmail.com", port) as server:
-            server.login(email, password)
+        with smtplib.SMTP_SSL("smtp.gmail.com", self.port) as server:
+            server.login(self.email, self.password)
             server.send_message(msg)
             server.quit()
 
