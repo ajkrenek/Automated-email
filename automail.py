@@ -188,12 +188,12 @@ class Mail:
 
 email = Mail('text file with list of reddit threads (eg: reddit.txt'),                              #self.file
             'tumblr url query (eg: https://www.tumblr.com/search/love%20quotes?t=1)',               #self.tumblr_url
-            'subreddit query',                                                                      #self.subreddit
+            'subreddit query (eg: funny/Dota2/etc)',                                                #self.subreddit
             "email you will be sending from",                                                       #self.email
             "email password",                                                                       #self.password
             "subject",                                                                              #self.subject
-            "email list you want to send to",                                                       #self.to_email 
-            "email list you wish to use",                                                           #self.email_list
+            "singular email you want to send to",                                                   #self.to_email 
+            "email list you wish to use (eg: email list.txt) ",                                     #self.email_list (set to None if not using a list)
             email port number)                                                                      #self.port
 
 
