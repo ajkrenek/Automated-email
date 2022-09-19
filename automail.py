@@ -112,12 +112,15 @@ class Mail:
 
     ### Sending Email Functions ###
     def get_email(self, email_list):
-        email_list = []
-        with open(self.email_list, 'r') as searchfile:
-            for line in searchfile:
-                emails = line.strip()
-                email_list.append(emails)
-        return email_list
+        if self.email_list is not None:
+            email_list = []
+            with open(self.email_list, 'r') as searchfile:
+                for line in searchfile:
+                    emails = line.strip()
+                    email_list.append(emails)
+            return email_list
+        else:
+            pass
 
     def send_mail(self):
         Quote = self.reddit_quote(self.file_name)
@@ -127,7 +130,10 @@ class Mail:
         recipients = self.get_email(self.email_list)
         msg["Subject"] = self.subject
         msg["From"] = self.email
-        msg["To"] = ", ".join(recipients)
+        if self.email_list is not None:
+            msg["To"] = ", ".join(recipients)
+        else:
+            msg["To"] = self.to_email
 
         msg.add_alternative("""\
     <html>
@@ -153,7 +159,10 @@ class Mail:
         recipients = self.get_email(self.email_list)
         msg["Subject"] = self.subject
         msg["From"] = self.email
-        msg["To"] = ", ".join(recipients)
+        if self.email_list is not None:
+            msg["To"] = ", ".join(recipients)
+        else:
+            msg["To"] = self.to_email
 
         msg.add_alternative("""\
     <html>
