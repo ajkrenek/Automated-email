@@ -1,207 +1,189 @@
-import smtplib, ssl, random, schedule, time, praw, datetime, re, math
+import datetime, math
+import json, random, pytumblr, praw
+import schedule, time
 import urllib.request
+import smtplib
+
+from bs4 import BeautifulSoup
 from email.message import EmailMessage
 from email.utils import make_msgid
-from bs4 import BeautifulSoup
+from dataclasses import dataclass
 
-### Global variables ###
-now = datetime.datetime.now()
+
+with open('config.json') as f:
+    config_data = json.load(f)
+
+reddit = praw.Reddit(   client_id=config_data['CLIENT_ID'], 
+                        client_secret=config_data['CLIENT_REDDIT_SECRET'],
+                        password=config_data['PASSWORD'], 
+                        user_agent=config_data['USER_AGENT'],
+                        username=config_data['USERNAME'])
+
+client = pytumblr.TumblrRestClient( client_key=config_data['CLIENT_KEY'], 
+                                    client_secret=config_data['CLIENT_TUMBLR_SECRET'], 
+                                    oauth_token=config_data['OAUTH_TOKEN'], 
+                                    oauth_secret=config_data['OAUTH_SECRET'])
+
+
+ahora = datetime.datetime.now()
 today_date = datetime.date.today()
-first_date = datetime.date(2020, 8, 17)                                         #specify date you want to compare to
-specific_day = 17
-current_year = now.year
-current_month = now.month
-special_date = datetime.date(current_year, current_month, specific_day)         #specifies the special date
+current_year = ahora.year
+current_month = ahora.month
 
-### Calculating and converting the date ###
-years_since = ((special_date - first_date).days)/365                            #converts number of days into years
-rounded = round(years_since,5)                                                  #rounds to 5 decimal place
-digits = math.modf(rounded)                                                     #splits the decimal into two: [decimal places, whole numbers]
-years = math.floor(digits[1])                                                   #takes the lowest value of the whole numbers
-months = round(digits[0]*12)                                                    #converts the decimal of the year into months
+def ann_date(ann_year: int, ann_month:int, ann_day: int):
+    
+    first_date = datetime.date(ann_year, ann_month, ann_day)
+    anniversary_date = datetime.date(current_year, current_month, ann_day)
+    years_since = ((anniversary_date - first_date).days)/365          #converts number of days into years
+    rounded = round(years_since,5)                            #rounds to 5 decimal place
+    digits = math.modf(rounded)                               #splits the decimal into two: [decimal places, whole numbers]
+    years = math.floor(digits[1])                             #takes the lowest value of the whole numbers
+    months = round(digits[0]*12)                              #converts the decimal of the year into months
 
-### Initializes reddit praw API ####
-reddit = praw.Reddit(client_id='',
-                    client_secret='',                          
-                    password='',
-                    user_agent='',
-                    username='')
+    return [years, months]
+
+
+def tumblr_post(quote_query: list[str]) -> list[str]:
+    
+    quote = random.choice(quote_query)
+    tumblr_url = 'https://www.tumblr.com/search/{}?t=1'
+    search_url = tumblr_url.format(quote.replace(" ", "%20"))
+    html = urllib.request.urlopen(search_url).read()
+    soup = BeautifulSoup(html, 'html.parser')
+
+    a_element = soup.find_all("a", {"class": "BSUG4"})
+    random_a_tag = random.choice(a_element)
+    blog_name = random_a_tag.get("data-login-wall-blog-name")
+
+    blog_info = client.blog_info(blog_name)
+    total_posts = blog_info['blog']['total_posts']
+    offset = random.randint(0, total_posts)
+    posts_data = client.posts(blog_name, limit=1, offset=offset)
+    random_post_dict_list = posts_data['posts']
+    post_dict = random_post_dict_list[0]
+    blog_post_url = post_dict['post_url']
+
+    if 'text' in post_dict:
+        return [blog_post_url, post_dict['text']]   
+
+    else:
+        return [blog_post_url, post_dict['trail'][0]['content']]
+            
+
+def reddit_picture_url(subreddit_query: list[str]) -> list[str]:
+
+    sub = random.choice(subreddit_query)
+    subreddit = reddit.subreddit(sub)
+    new_posts = list(subreddit.new(limit=20))
+    random_post = random.choice(new_posts)
+    while not random_post.url.endswith(('.png', '.jpg', '.jpeg')):
+        random_post = subreddit.random()
+    return [sub, random_post.url]
+
+
+@dataclass
 class Mail:
 
-    def __init__(self, file_name, tumblr_url_query, subreddit_query, email, password, subject, to_email, email_list, port):
-        self.file_name = file_name
-        self.tumblr_url_query = tumblr_url_query
-        self.subreddit_query = subreddit_query
-
-        self.email = email
-        self.password = password
-        self.subject = subject
-        self.to_email = to_email
-        self.email_list = email_list
-        self.port = port
-
-    ### Email Object Functions ###
-
-    def reddit_quote(self, file_name):
-
-        with open(self.file_name, 'r') as f:                            #opens text file with list of links
-            read = f.read()
-            array = read.split('\n')
-            link = random.choice(array)
-
-        reddit_url = link
-        another_list = []
-
-
-        submissions = reddit.submission(url=reddit_url)                 #parses through the reddit comment thread and appends to a list
-        for top_level_comment in submissions.comments:
-            another_list.append(top_level_comment.body)
-
-        reddit_comment = random.choice(another_list)                    #parses through the list and skips over removed, deleted, or empty comments
-        for item in reddit_comment:
-            if item == '[removed]':
-                continue
-            if item == '[deleted]':
-                continue
-            if item == ' ':
-                new_reddit_comment = reddit_comment
-                break
-        return new_reddit_comment
-
-    def tumblr_url(self, tumblr_url_query):
-        tumblr_url = self.tumblr_url_query
-        html = urllib.request.urlopen(tumblr_url).read()
-        soup = BeautifulSoup(html, 'html.parser')
-        some_list = []
-        for post in soup.find_all('a', href=True):                      #looks through the HTML of the specified link for 'a' tags and adds matches to a list
-            some_list.append(post['href'])
-
-
-        post_url = re.findall(r'''
-        #structure of post url : https://somename.tumblr.com/post/12094812094814/some-post-name
-        https?://                      # https part
-        (?:[-\w.]|(?:%[\da-fA-F]{2}))+ # name.tumblr part
-        /                              # forward slash
-        \w+                            #'post'
-        /                              # forward slash
-        \d+                            # the digits
-        /                              # forward slash
-        [\w-]*                         # some-post-name
-        ''',str(some_list), re.VERBOSE)
-
-        post = random.choice(post_url)                                  #looks for tumblr link and returns a random post from the list
-        return post
-
-    def reddit_picture_url(self, subreddit_query):
-
-        url_list = ""
-        sub = self.subreddit_query
-        subreddit = reddit.subreddit(sub)
-        new_subreddit = subreddit.new(limit=20)
-
-        for submission in new_subreddit:                                #looks through the first 20 posts that contain images and appends them to a list
-            picture_url = str(submission.url)
-            if picture_url.endswith('jpg') or picture_url.endswith('jpeg') or picture_url.endswith('png'):
-                url_list += picture_url +'\n'
-
-        url_link = url_list.split()
-        random_url = random.choice(url_link)                            #splits the url and returns a random image
-
-        return random_url
-
-
-    ### Sending Email Functions ###
-    def get_email(self, email_list):
-        if self.email_list is not None:
-            email_list = []
-            with open(self.email_list, 'r') as searchfile:
-                for line in searchfile:
-                    emails = line.strip()
-                    email_list.append(emails)
-            return email_list
-        else:
-            pass
+    email: str
+    password: str
+    to_email: str
+    subject: str
+    ann_year: int
+    ann_month: int
+    ann_day: int
+    tumblr_search_query: str
+    subreddit_list: list[str]
+    port: int
 
     def send_mail(self):
-        Quote = self.reddit_quote(self.file_name)
-        Url = self.tumblr_url(self.tumblr_url)
-        Picture = self.reddit_picture_url(self.subreddit_query)
+        tumblr_quote = tumblr_post(self.tumblr_search_query)
+        tumblr_url = tumblr_quote[0]
+        tumblr_text = tumblr_quote[1]
+        reddit_image = reddit_picture_url(self.subreddit_list)
+        reddit_sub = reddit_image[0]
+        sub_image = reddit_image[1]
         msg = EmailMessage()
-        recipients = self.get_email(self.email_list)
+
         msg["Subject"] = self.subject
         msg["From"] = self.email
-        if self.email_list is not None:
-            msg["To"] = ", ".join(recipients)
-        else:
-            msg["To"] = self.to_email
-
+        msg["To"] = self.to_email
         msg.add_alternative("""\
-    <html>
-        <head> <h1> </h1> </head>
-        <body>
-            <p> {Quote} </p>
-            <p> {Url} </p>
-            <img src = {Picture} width="400" height="400"/>
-        </body>
-    </html>
-    """.format(Quote=Quote, Url=Url, Picture=Picture), subtype = 'html')    #embeds quote, link, and picture resized to 400x400 pixels
+            <html>
+                <body>
+                    <p> <em>{tumblr_text}</em> 
+                    <br>
+                    {tumblr_url}  
+                    </p>
+                    <br>
+                    <img src = {sub_image}
+                    width="400" height="400"/>
+                </body>
+            </html>
+        """.format(tumblr_text=tumblr_text, tumblr_url=tumblr_url, reddit_sub=reddit_sub, sub_image=sub_image), subtype = 'html')
 
         with smtplib.SMTP_SSL("smtp.gmail.com", self.port) as server:
             server.login(self.email, self.password)
             server.send_message(msg)
             server.quit()
 
-    def special_mail():
-        Quote = self.reddit_quote(self.file_name)
-        Url = self.tumblr_url(self.tumblr_url)
-        Picture = self.reddit_picture_url(self.subreddit_query)
+    def send__ann_mail(self):
+        dates = ann_date(self.ann_year, self.ann_month, self.ann_day)
+        years = dates[0]
+        months = dates[1]
+
+        tumblr_quote = tumblr_post(self.tumblr_search_query)
+        tumblr_url = tumblr_quote[0]
+        tumblr_text = tumblr_quote[1]
+
+        reddit_image = reddit_picture_url(self.subreddit_list)
+        reddit_sub = reddit_image[0]
+        sub_image = reddit_image[1]
+        
         msg = EmailMessage()
-        recipients = self.get_email(self.email_list)
+
         msg["Subject"] = self.subject
         msg["From"] = self.email
-        if self.email_list is not None:
-            msg["To"] = ", ".join(recipients)
-        else:
-            msg["To"] = self.to_email
-
+        msg["To"] = self.to_email
         msg.add_alternative("""\
-    <html>
-        <head> <h1> Special Day </h1> </head>
-        <h2> Happy {years} years and {months} months!!</h2>
-        <body>
-            <p> {Quote} </p>
-            <p> {Url} </p>
-            <img src = {Picture}
-            width="400" height="400"/>
-        </body>
-    </html>
-""".format(Quote=Quote, Url=Url, Picture=Picture, years=year, months=month), subtype = 'html') #embeds the year and month into email
+            <html>
+                <h2> Happy {years} years and {months} months!!</h2>
+                <body>
+                    <p> <em>{tumblr_text}</em> 
+                    <br>
+                    {tumblr_url}  
+                    </p>
+                    <br>
+                    <img src = {sub_image}
+                    width="400" height="400"/>
+                </body>
+            </html>
+        """.format(years=years, months=months, tumblr_text=tumblr_text, tumblr_url=tumblr_url, reddit_sub=reddit_sub, sub_image=sub_image), subtype = 'html')
 
         with smtplib.SMTP_SSL("smtp.gmail.com", self.port) as server:
             server.login(self.email, self.password)
             server.send_message(msg)
-            server.quit()
+            server.quit()            
 
 
-
-
-
-email = Mail('text file with list of reddit threads (eg: reddit.txt'),                              #self.file
-            'tumblr url query (eg: https://www.tumblr.com/search/love%20quotes?t=1)',               #self.tumblr_url
-            'subreddit query (eg: funny/Dota2/etc)',                                                #self.subreddit
-            "email you will be sending from",                                                       #self.email
-            "email password",                                                                       #self.password
-            "subject",                                                                              #self.subject
-            "singular email you want to send to",                                                   #self.to_email 
-            "email list you wish to use (eg: email list.txt) ",                                     #self.email_list (set to None if not using a list)
-            email port number)                                                                      #self.port
+email = Mail(email="example@gmail.com",
+            password=config_data['EMAIL_PASSWORD'], 
+            to_email="receiver@gmail.com", 
+            subject="SUBJECT",
+            ann_year=2020,
+            ann_month=int("08"),
+            ann_day=17, 
+            tumblr_search_query=["inspirational quotes"], 
+            subreddit_list=['frogs', 'CatsWithHats'], 
+            port=465)
 
 
 if __name__ == '__main__':
-    if today_date == special_date:
-        schedule.every().day.at("15:00").do(email.special_mail)
+    if today_date == 17:
+        schedule.every().day.at("15:00").do(email.send_ann_mail)
+        
     else:
         schedule.every().day.at("15:00").do(email.send_mail)
+        
     while True:
         schedule.run_pending()
         time.sleep(1)
