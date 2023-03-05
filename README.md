@@ -24,7 +24,7 @@ If you're using a gmail account to send emails, third party apps are no longer s
  1. Go to your gmail account -> Manage your Google account -> Security tab -> Scroll down and enable 2-Step Verification under 'Signing in to Google'.
  2. Go back to the Security Tab and underneath 2-Step Verification will be an 'App Passwords' tab, click that and generate an app password.
 
-#Running the script
+# Running the script
 To run the script, you create an email class object with the following arguments:
 - email -> This is the email address that the script will be accessing to send the emails from.
 - passowrd -> This is the app password that the script will you use to login.
@@ -37,4 +37,7 @@ To run the script, you create an email class object with the following arguments
 - tumblr_search_query -> A list of search queries that will be used to find posts.
 - subreddit_list -> A list of subreddits that will be used to pull images from.
 - port -> The port address of your email service (For Gmail the port is 465).
+
+### ann_date function
+The ann_date function calculates the years and months since the user joined the email list/anniversary date to display in the email on their anniversary date.
   
