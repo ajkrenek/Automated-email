@@ -1,13 +1,26 @@
 # Automated-email
-This is a program that sends a daily personalized email embedded with a post and link from tumblr and image from a subreddit. This program also sends an anniversary email and displays the length since the anniversary date.
+## This script sends a daily personalized email embedded with a post and link from tumblr and image from a subreddit. You can also send a custom email on a specified date, such as an anniversary.
 
+In order for this script to run you will need to set up the following:
+- Tumblr API 
+- Reddit API 
+- Gmail third party access
+
+# Accessing Tumblr API
+1. First you need to create a [tumblr account](https://www.tumblr.com/)
+2. Once registered, you will then need to register your [app](https://www.tumblr.com/oauth/apps)
+3. Once you have registered your application, you will be given an API key. Add the keys to the config.json file.
+4. To make API requests, you will need to authenticate your requests using OAuth. You can find detailed instructions on how to do this in the Tumblr API documentation.
 
 # Creating Reddit client_id and client_secret
-
-Go to your Reddit account -> preferences -> apps. Create another app, give the bot a name and description. Select the script option and fill in about and redirect to anything. The client id and client secret values will be given to you. Fill in those values and the reddit username and password in the respective boxes.
+1. Go to your Reddit account -> preferences -> apps. 
+2. Create another app, give the bot a name and description. 
+3. Select the script option and fill in about and redirect to anything. 
+4. The client id and client secret values will be given to you. Fill in those values and the reddit username and password in the respective boxes.
+5. Add the tokens to config.json
 
 # Creating app password for gmail
-If you're using a gmail account to send emails, third party apps are no longer supported to access gmail, you will need to create an app password to allow Python to access the email account.
+If you're using a gmail account to send emails, third party apps are no longer supported to access gmail; you will need to create an app password to allow the Python script to access the email account.
   1) Go to your gmail account -> Manage your Google account -> Security tab -> Scroll down and enable 2-Step Verification under 'Signing in to Google'.
   2) Go back to the Security Tab and underneath 2-Step Verification will be an 'App Passwords' tab, click that and generate an app password.
   
