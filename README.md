@@ -7,13 +7,13 @@ In order for this script to run you will need to set up the following:
 - Gmail third party access
 
 # Accessing Tumblr API
-1. First you need to create a [tumblr account](https://www.tumblr.com/)
-2. Once registered, you will then need to register your [app](https://www.tumblr.com/oauth/apps)
+1. First you need to create a [tumblr account](https://www.tumblr.com/).
+2. Once registered, you will then need to register your [app](https://www.tumblr.com/oauth/apps).
 3. Once you have registered your application, you will be given an API key. Add the keys to the config.json file.
 4. To make API requests, you will need to authenticate your requests using OAuth. You can find detailed instructions on how to do this in the Tumblr API documentation.
 
 # Creating Reddit client_id and client_secret
-1. Go to your Reddit account -> preferences -> apps. 
+1. Go to your [Reddit account -> preferences -> apps](https://www.reddit.com/prefs/apps/). 
 2. Create another app, give the bot a name and description. 
 3. Select the script option and fill in about and redirect to anything. 
 4. The client id and client secret values will be given to you. Fill in those values and the reddit username and password in the respective boxes.
