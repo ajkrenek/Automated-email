@@ -39,9 +39,20 @@ To run the script, you create an email class object with the following arguments
 - subreddit_list -> A list of subreddits that will be used to pull images from.
 - port -> The port address of your email service (For Gmail the port is 465).
 
-The email is structured using HTML and a basic template is provided, but can customized.
+The email is structured using HTML and a basic template is provided, but can be customized. 
+To embed more objects into the email, the variable name must be put into brackets, {var_name}, and then add the tag and variable into the .format().
 ```
-
+        msg.add_alternative("""\
+            <html>
+                <body>
+                    <h1> {var_name} </h1>
+                    <p> <em>{tumblr_text}</em> {tumblr_url}  </p>
+                    <br>
+                    <img src = {sub_image}
+                    width="400" height="400"/>
+                </body>
+            </html>
+        """.format(var_name=var_name, tumblr_text=tumblr_text, tumblr_url=tumblr_url, reddit_sub=reddit_sub, sub_image=sub_image), subtype = 'html')
 ```
 
 ### ann_date function
