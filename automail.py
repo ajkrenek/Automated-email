@@ -19,10 +19,11 @@ reddit = praw.Reddit(   client_id=config_data['CLIENT_ID'],
                         user_agent=config_data['USER_AGENT'],
                         username=config_data['USERNAME'])
 
-client = pytumblr.TumblrRestClient( client_key=config_data['CLIENT_KEY'], 
-                                    client_secret=config_data['CLIENT_TUMBLR_SECRET'], 
-                                    oauth_token=config_data['OAUTH_TOKEN'], 
-                                    oauth_secret=config_data['OAUTH_SECRET'])
+client_key=config_data['CLIENT_KEY']
+client_secret=config_data['CLIENT_TUMBLR_SECRET'] 
+oauth_token=config_data['OAUTH_TOKEN'] 
+oauth_secret=config_data['OAUTH_SECRET']
+client = pytumblr.TumblrRestClient(client_key, client_secret, oauth_token, oauth_secret)
 
 
 ahora = datetime.datetime.now()
@@ -88,13 +89,25 @@ class Mail:
     password: str
     to_email: str
     subject: str
+    send_time: str
     ann_year: int
     ann_month: int
     ann_day: int
     tumblr_search_query: str
     subreddit_list: list[str]
     port: int
-
+    
+    def email_depart(self):
+        if today_date == self.ann_day:
+            schedule.every().day.at(self.send_time).do(self.send_ann_mail)
+            
+        else:
+            schedule.every().day.at(self.send_time).do(self.send_mail)
+            
+        while True:
+            schedule.run_pending()
+            time.sleep(1)
+            
     def send_mail(self):
         tumblr_quote = tumblr_post(self.tumblr_search_query)
         tumblr_url = tumblr_quote[0]
@@ -110,10 +123,7 @@ class Mail:
         msg.add_alternative("""\
             <html>
                 <body>
-                    <p> <em>{tumblr_text}</em> 
-                    <br>
-                    {tumblr_url}  
-                    </p>
+                    <p> <em>{tumblr_text}</em> {tumblr_url}  </p>
                     <br>
                     <img src = {sub_image}
                     width="400" height="400"/>
@@ -126,7 +136,7 @@ class Mail:
             server.send_message(msg)
             server.quit()
 
-    def send__ann_mail(self):
+    def send_ann_mail(self):
         dates = ann_date(self.ann_year, self.ann_month, self.ann_day)
         years = dates[0]
         months = dates[1]
@@ -148,10 +158,7 @@ class Mail:
             <html>
                 <h2> Happy {years} years and {months} months!!</h2>
                 <body>
-                    <p> <em>{tumblr_text}</em> 
-                    <br>
-                    {tumblr_url}  
-                    </p>
+                    <p> <em>{tumblr_text}</em> {tumblr_url}  </p>
                     <br>
                     <img src = {sub_image}
                     width="400" height="400"/>
@@ -169,6 +176,7 @@ email = Mail(email="example@gmail.com",
             password=config_data['EMAIL_PASSWORD'], 
             to_email="receiver@gmail.com", 
             subject="SUBJECT",
+            send_time="15:00",
             ann_year=2020,
             ann_month=int("08"),
             ann_day=17, 
@@ -178,12 +186,4 @@ email = Mail(email="example@gmail.com",
 
 
 if __name__ == '__main__':
-    if today_date == 17:
-        schedule.every().day.at("15:00").do(email.send_ann_mail)
-        
-    else:
-        schedule.every().day.at("15:00").do(email.send_mail)
-        
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+    email.email_depart()
