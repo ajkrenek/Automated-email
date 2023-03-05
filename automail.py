@@ -31,7 +31,7 @@ today_date = datetime.date.today()
 current_year = ahora.year
 current_month = ahora.month
 
-def ann_date(ann_year: int, ann_month:int, ann_day: int):
+def ann_date(ann_year: int, ann_month:int, ann_day: int) -> list[int]:
     
     first_date = datetime.date(ann_year, ann_month, ann_day)
     anniversary_date = datetime.date(current_year, current_month, ann_day)
@@ -59,7 +59,7 @@ def tumblr_post(quote_query: list[str]) -> list[str]:
     blog_info = client.blog_info(blog_name)
     total_posts = blog_info['blog']['total_posts']
     offset = random.randint(0, total_posts)
-    posts_data = client.posts(blog_name, limit=1, offset=offset)
+    posts_data = client.posts(blog_name, tag=quote, limit=1, offset=offset)
     random_post_dict_list = posts_data['posts']
     post_dict = random_post_dict_list[0]
     blog_post_url = post_dict['post_url']
