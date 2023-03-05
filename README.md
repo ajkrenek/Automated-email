@@ -21,6 +21,20 @@ In order for this script to run you will need to set up the following:
 
 # Creating app password for gmail
 If you're using a gmail account to send emails, third party apps are no longer supported to access gmail; you will need to create an app password to allow the Python script to access the email account.
-  1) Go to your gmail account -> Manage your Google account -> Security tab -> Scroll down and enable 2-Step Verification under 'Signing in to Google'.
-  2) Go back to the Security Tab and underneath 2-Step Verification will be an 'App Passwords' tab, click that and generate an app password.
+ 1. Go to your gmail account -> Manage your Google account -> Security tab -> Scroll down and enable 2-Step Verification under 'Signing in to Google'.
+ 2. Go back to the Security Tab and underneath 2-Step Verification will be an 'App Passwords' tab, click that and generate an app password.
+
+#Running the script
+To run the script, you create an email class object with the following arguments:
+- email -> This is the email address that the script will be accessing to send the emails from.
+- passowrd -> This is the app password that the script will you use to login.
+- to_email -> The email recipient.
+- subject -> Subject header for the email.
+- send_time -> The time that you would like to send emails at daily (must be in military time e.g. 3:00 pm = 15:00).
+- ann_year -> The year that the recipient joined the email list/anniversary year
+- ann_month -> The month that the recipient joined the email list/anniversary month
+- ann_day -> The day that the recipient joined the email list/anniversary day
+- tumblr_search_query -> A list of search queries that will be used to find posts.
+- subreddit_list -> A list of subreddits that will be used to pull images from.
+- port -> The port address of your email service (For Gmail the port is 465).
   
