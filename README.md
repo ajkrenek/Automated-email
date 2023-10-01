@@ -32,9 +32,7 @@ To run the script, you create an email class object with the following arguments
 - to_email -> The email recipient.
 - subject -> Subject header for the email.
 - send_time -> The time that you would like to send emails at daily (must be in military time e.g. 3:00 pm = 15:00).
-- ann_year -> The year that the recipient joined the email list/anniversary year
-- ann_month -> The month that the recipient joined the email list/anniversary month
-- ann_day -> The day that the recipient joined the email list/anniversary day
+- ann_date -> Date of anniversary in YYYY/MM/DD format
 - tumblr_search_query -> A list of search queries that will be used to find posts.
 - subreddit_list -> A list of subreddits that will be used to pull images from.
 - port -> The port address of your email service (For Gmail the port is 465).
