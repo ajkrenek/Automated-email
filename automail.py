@@ -119,7 +119,7 @@ class Mail:
     port: int
     
     def email_depart(self):
-        self.send_mail()
+        schedule.every().day.at(self.send_time).do(self.send_mail)
         while True:
             schedule.run_pending()
             time.sleep(1)
